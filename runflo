@@ -22,13 +22,13 @@ require 'tempfile'
 # Reads config file. Runs task to create chain file, then runs liftOver.
 task 'default' do
   # Check for presence of config file. Exit if not found.
-  unless File.exist? 'flo_opts.yaml'
+  unless File.exist? ENV['FLO_OPTS']
     puts "Config file not found. See README for how to use flo."
     exit!
   end
 
   # Read config file.
-  CONFIG = YAML.load_file 'flo_opts.yaml'
+  CONFIG = YAML.load_file ENV['FLO_OPTS']
 
   # Add dirs specified in config to PATH.
   Array(CONFIG[:add_to_path]).each { |path| add_to_PATH path }
