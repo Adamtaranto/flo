@@ -74,15 +74,13 @@ each transcript, you will need to remove that:
 
     ./gff_remove_feats.rb gene xx_genes.gff > xx_genes_cleaned.gff
 
-*Note:* GFF files must contain appropriate headers (below) and all 
-records must have ID file formatted as "ID=SomeIDhere;":  
+*Note:* GFF files must contain appropriate headers and all 
+records must have *ID* field formatted as "ID=someidstring;" :  
 
-    </h3>
     ##gff-version   3
     ##sequence-region   scaffold_001 1 2530722
     scaffold_001  . gene  26031 29368 . - . ID=Gene_00004;
     scaffold_001  . mRNA  26031 29368 . - . ID=RNA_00004;Parent=Gene_00004;
-    </h3>
 
 Finally, run flo as:
 
