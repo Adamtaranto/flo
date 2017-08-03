@@ -4,9 +4,9 @@
 # are created by `scripts/install.sh`.Comment out or edit the paths based
 # on how you installed UCSC-Kent toolkit, GNU Parallel and genometools.
 :add_to_path:
-  - 'ext/kent/bin'
-  - 'ext/parallel-20150722/src'
-  - 'ext/genometools-1.5.6/bin'
+  - 'scripts/ext/kent/bin'
+  - 'scripts/ext/parallel-20150722/src'
+  - 'scripts/ext/genometools-1.5.6/bin'
 
 # Location of source and target assemblies.
 #
@@ -18,7 +18,8 @@
 
 # Number of processes that will be used to parallelise flo. Ideally, this
 # will be the number of CPU cores you have.
-:processes: 'unset'
+# Must be provided as string.
+:processes: '1'
 
 # Parameters to run BLAT with.
 #
