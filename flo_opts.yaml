@@ -6,7 +6,8 @@
 # These will be added to PATH before the pipeline is run. The paths below
 # are created by `scripts/install_mac.sh` or `scripts/install_unix.sh`.Comment out or edit the paths based
 # on how you installed UCSC-Kent toolkit, GNU Parallel and genometools.
-# If using homebrew to install dependencies on mac, check location with: 'which gt' and 'which parallel'
+# If using homebrew to install dependencies on mac gt and parallel should already be on the PATH, 
+# if not check location with: 'which gt' and 'which parallel'
 :add_to_path:
   - 'scripts/ext/kent/bin'
   - /usr/local/bin/gt

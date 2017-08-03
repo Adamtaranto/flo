@@ -38,7 +38,7 @@ flo additionally requires a few programs from [UCSC tools][ucsc-tools], [GNU
 Parallel][gnu-parallel] and [genometools][genometools]. Clone flo from this 
 repository and run the mac or unix install script to get dependencies:
 
-    git clone https://github.com/Adamtaranto/flo.git && cd flo/scripts && ./install_mac.sh
+    git clone https://github.com/Adamtaranto/flo.git && cd flo/scripts && ./install_mac.sh && cd ..
 
 For mac use homebrew to install genometools and GNU-parallel:
 
@@ -48,28 +48,30 @@ For mac use homebrew to install genometools and GNU-parallel:
 It's best to run flo in a new directory - we will call it flo_project:
 
     mkdir flo_project
-    cd flo_project
 
 Copy over example configuration file from where you installed flo to
 project dir:
 
-    cp flo_opts.yaml flo_project/flo_opts.yaml
+    cp flo_opts.yaml flo_project/project_opts.yaml
 
-Now edit `flo_project/flo_opts.yaml` to indicate:
-1. Location of source and target assembly in FASTA format (required).
-2. Location of GFF3 file(s) containing annotations on the source
-   assembly. If this is omitted, flo will stop after generating
-   the chain file.
-3. BLAT parameters (optional). By default the target assembly is
+Now edit `flo_project/project_opts.yaml` to indicate:
+
+1. Path to project directory
+2. Locations of installed dependancies
+3. Location of source and target assembly in FASTA format (required).
+4. Number of CPU cores to use (required - not auto detected). Default '1'.
+5. BLAT parameters (optional). By default the target assembly is
    assumed to be of the same species. If the target assembly is
    a different (but closely related) species, you may want to
    lower `minIdentity`.
-4. Number of CPU cores to use (required - not auto detected). Default '1'.
+6. Location of GFF3 file(s) containing annotations on the source
+   assembly. If this is omitted, flo will stop after generating
+   the chain file.
 
 Here, it's important to note that flo can only work with transcripts
 and their child exons and CDS. Transcripts can be annotated as: mRNA,
 transcript, or gene. However, if you have a 'gene' annotation for
-each transcript, you will need to remove that:
+each transcript, you will need to provide a cleaned gff file:
 
     ./gff_remove_feats.rb gene xx_genes.gff > xx_genes_cleaned.gff
 
@@ -83,7 +85,7 @@ records must have *ID* field formatted as "ID=someidstring;" :
 
 Finally, run flo as:
 
-    rake -f runflo.rake FLO_OPTS=flo_project/flo_opts.yaml
+    rake -f runflo.rake FLO_OPTS=flo_project/project_opts.yaml
 
 This will generate a directory called 'run_[timestamp]/' within the project directory. 
 A subdirectory is created within 'run_[timestamp]/' for each GFF3 input file and contains:
