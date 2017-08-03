@@ -12,12 +12,12 @@ feat_type_to_remove, gff_file = ARGV
 
 # Collect id of the features we want to remove.
 feat_ids_to_remove = []
-IO.foreach(gff_file) do |line|
-  next if line[0] == '#'
 
-  line = line.split
+File.readlines(gff_file).each do |line|
+  next if line[0] == '#'
+  line = line.chomp.split(/\t/)
   if line[2] == feat_type_to_remove
-    feat_id = line[8].match(/ID=(.+?);/)[1]
+    feat_id = line[8].match(/ID=(.+?);/i)[1]
     feat_ids_to_remove << feat_id
   end
 end
