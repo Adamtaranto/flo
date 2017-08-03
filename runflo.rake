@@ -38,19 +38,20 @@ task 'default' do
 
   # Set unique directory name for rhis run 
   runStamp = Time.now.strftime("%Y%m%d%H%M%S%3N")
-  runDir = "#{projectDir}/run_#{runStamp}"
+  RUNDIR = "#{projectDir}/run_#{runStamp}"
+  mkdir RUNDIR
 
   # Create chain file.
-  task('#{runDir}/liftover.chn').invoke
+  liftchain "#{RUNDIR}/liftover.chn"
 
   # Lift over the given GFF3 files.
   Array(CONFIG[:lift]).each do |inp|
     gffbase = File.basename(inp, '.*')
-    outdir = "#{runDir}/#{gffbase}"
+    outdir = "#{RUNDIR}/#{gffbase}"
     mkdir outdir
 
     # Lift over the annotations from source assembly to target assembly.
-    sh "liftOver -gff #{inp} #{runDir}/liftover.chn #{outdir}/lifted.gff3" \
+    sh "liftOver -gff #{inp} #{RUNDIR}/liftover.chn #{outdir}/lifted.gff3" \
        " #{outdir}/unlifted.gff3"
 
     # Clean lifted annotations.
@@ -61,65 +62,64 @@ task 'default' do
     sh "ln -s #{File.expand_path inp} #{outdir}/input.gff"
 
     # Compare input and lifted gff at CDS level.
-    sh "#{__dir__}/gff_compare.rb cds #{runDir}/source.fa #{runDir}/target.fa" \
+    sh "#{__dir__}/gff_compare.rb cds #{RUNDIR}/source.fa #{RUNDIR}/target.fa" \
        " #{outdir}/input.gff #{outdir}/lifted_cleaned.gff"         \
        " > #{outdir}/unmapped.txt"
   end
 end
 
 # Task to create chain file.
-file '#{runDir}/liftover.chn' do
-  mkdir '#{runDir}'
-
+def liftchain(outfile)
+  #Future: Add option to recycle old chainfile #
   processes = CONFIG[:processes]
   blat_opts = CONFIG[:blat_opts]
+  
+  cp CONFIG[:source_fa], "#{RUNDIR}/source.fa"
+  cp CONFIG[:target_fa], "#{RUNDIR}/target.fa"
 
-  cp CONFIG[:source_fa], '#{runDir}/source.fa'
-  cp CONFIG[:target_fa], '#{runDir}/target.fa'
+  to_2bit "#{RUNDIR}/source.fa"
+  to_2bit "#{RUNDIR}/target.fa"
 
-  to_2bit '#{runDir}/source.fa'
-  to_2bit '#{runDir}/target.fa'
-
-  to_sizes '#{runDir}/source.2bit'
-  to_sizes '#{runDir}/target.2bit'
+  to_sizes "#{RUNDIR}/source.2bit"
+  to_sizes "#{RUNDIR}/target.2bit"
 
   # Partition target assembly.
-  sh "faSplit sequence #{runDir}/target.fa #{processes} #{runDir}/chunk_"
+  sh "faSplit sequence #{RUNDIR}/target.fa #{processes} #{RUNDIR}/chunk_"
 
-  parallel Dir['#{runDir}/chunk_*.fa'],
+  parallel Dir["#{RUNDIR}/chunk_*.fa"],
     'faSplit -oneFile size %{this} 5000 %{this}.5k -lift=%{this}.lft &&'       \
     'mv %{this}.5k.fa %{this}'
 
   # BLAT each chunk of the target assembly to the source assembly.
-  parallel Dir['#{runDir}/chunk_*.fa'],
-    "blat -noHead #{blat_opts} #{runDir}/source.fa %{this} %{this}.psl"
+  parallel Dir["#{RUNDIR}/chunk_*.fa"],
+    "blat -noHead #{blat_opts} #{RUNDIR}/source.fa %{this} %{this}.psl"
 
-  parallel Dir['#{runDir}/chunk_*.fa'],
+  parallel Dir["#{RUNDIR}/chunk_*.fa"],
     "liftUp -type=.psl -pslQ -nohead"                                          \
     " %{this}.psl.lifted %{this}.lft warn %{this}.psl"
 
   # Derive a chain file each from BLAT's .psl output files.
-  parallel Dir['#{runDir}/chunk_*.psl.lifted'],
+  parallel Dir["#{RUNDIR}/chunk_*.psl.lifted"],
     'axtChain -psl -linearGap=medium'                                          \
-    ' %{this} #{runDir}/source.2bit #{runDir}/target.2bit %{this}.chn'
+    " %{this} #{RUNDIR}/source.2bit #{RUNDIR}/target.2bit %{this}.chn"
 
   # Sort the chain files.
-  parallel Dir["#{runDir}/chunk_*.chn"],
+  parallel Dir["#{RUNDIR}/chunk_*.chn"],
     'chainSort %{this} %{this}.sorted'
 
   # Combine sorted chain files into a single sorted chain file.
-  sh 'chainMergeSort #{runDir}/*.chn.sorted | chainSplit run stdin -lump=1'
-  mv '#{runDir}/000.chain', '#{runDir}/combined.chn.sorted'
+  sh "chainMergeSort #{RUNDIR}/*.chn.sorted | chainSplit #{RUNDIR} stdin -lump=1"
+  mv "#{RUNDIR}/000.chain", "#{RUNDIR}/combined.chn.sorted"
 
   # Derive net file from combined, sorted chain file.
   sh 'chainNet'                                                                \
-     ' #{runDir}/combined.chn.sorted #{runDir}/source.sizes #{runDir}/target.sizes'              \
-     ' #{runDir}/combined.chn.sorted.net /dev/null'
+     " #{RUNDIR}/combined.chn.sorted #{RUNDIR}/source.sizes #{RUNDIR}/target.sizes"             \
+     " #{RUNDIR}/combined.chn.sorted.net /dev/null"
 
   # Subset combined, sorted chain file.
   sh 'netChainSubset'                                                          \
-     ' #{runDir}/combined.chn.sorted.net #{runDir}/combined.chn.sorted'                    \
-     ' #{runDir}/liftover.chn'
+     " #{RUNDIR}/combined.chn.sorted.net #{RUNDIR}/combined.chn.sorted"                   \
+     " #{RUNDIR}/liftover.chn"
 end
 
 ### Helpers ###
@@ -142,8 +142,8 @@ end
 def parallel(files, template)
   name = template.split.first
   jobs = files.map { |file| template % { :this => file } }
-  joblst = "#{runDir}/joblst.#{name}"
-  joblog = "#{runDir}/joblog.#{name}"
+  joblst = "#{RUNDIR}/joblst.#{name}"
+  joblog = "#{RUNDIR}/joblog.#{name}"
   File.write(joblst, jobs.join("\n"))
   sh "parallel --joblog #{joblog} -j #{jobs.length} -a #{joblst}"
 end
