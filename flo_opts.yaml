@@ -1,5 +1,8 @@
 # Location of binaries expected by flo.
 #
+# Set path to project directory
+:projectDir: 'flo_project'
+
 # These will be added to PATH before the pipeline is run. The paths below
 # are created by `scripts/install.sh`.Comment out or edit the paths based
 # on how you installed UCSC-Kent toolkit, GNU Parallel and genometools.
