@@ -16,20 +16,3 @@ curl -O "http://hgdownload.cse.ucsc.edu/admin/exe/macOSX.x86_64/netChainSubset"
 chmod +x *
 cd -
 
-# GNU parallel
-cd ext
-curl http://ftp.gnu.org/gnu/parallel/parallel-20150722.tar.bz2
-tar xvf parallel-20150722.tar.bz2
-rm parallel-20150722.tar.bz2
-cd parallel-20150722
-./configure
-make
-cd ../..
-
-# Genometools
-cd ext
-curl -O https://github.com/genometools/genometools/archive/v1.5.6.tar.gz
-tar xvf v1.5.6.tar.gz
-rm v1.5.6.tar.gz
-cd genometools-1.5.6
-make cairo=no errorcheck=no

@@ -38,10 +38,9 @@ flo additionally requires a few programs from [UCSC tools][ucsc-tools], [GNU
 Parallel][gnu-parallel] and [genometools][genometools]. Clone flo from this 
 repository and run the mac or unix install script to get dependencies:
 
-    git clone https://github.com/Adamtaranto/flo.git && cd flo/scripts && install_mac.sh
+    git clone https://github.com/Adamtaranto/flo.git && cd flo/scripts && ./install_mac.sh
 
-Alternatively genometools and GNU Parallel can be installed using homebrew 
-on Mac for general use:  
+For mac use homebrew to install genometools and GNU-parallel:
 
     brew install gt
     brew install parallel 
