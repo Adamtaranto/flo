@@ -38,7 +38,8 @@ task 'default' do
 
   # Lift over the given GFF3 files.
   Array(CONFIG[:lift]).each do |inp|
-    outdir = "run/#{inp.ext}"
+    gffbase = File.basename(inp, '.*')
+    outdir = "run/#{gffbase}"
     mkdir outdir
 
     # Lift over the annotations from source assembly to target assembly.
