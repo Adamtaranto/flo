@@ -27,12 +27,13 @@ and set it as default:
     brew update
     brew install ruby-build
     brew install rbenv
-    rbenv install 2.4.1
-    rbenv global 2.4.1
+    rbenv install 2.4.2
+    rbenv global 2.4.2
 
 To install the BioRuby gem:
 
     sudo gem install bio
+    sudo gem install rake
 
 flo additionally requires a few programs from [UCSC tools][ucsc-tools], [GNU
 Parallel][gnu-parallel] and [genometools][genometools]. Clone flo from this 
@@ -76,12 +77,18 @@ each transcript, you will need to provide a cleaned gff file:
     ./gff_remove_feats.rb gene xx_genes.gff > xx_genes_cleaned.gff
 
 *Note:* GFF files must contain appropriate headers and all 
-records must have *ID* field formatted as "ID=someidstring;" :  
+records must have *ID* field formatted as "ID="*someidstring*";" with 
+all rows ending in a ";" :  
 
     ##gff-version   3
     ##sequence-region   scaffold_001 1 2530722
     scaffold_001  . gene  26031 29368 . - . ID=Gene_00004;
     scaffold_001  . mRNA  26031 29368 . - . ID=RNA_00004;Parent=Gene_00004;
+
+Ensure proper sorting and formatting by pre-processing your annotation file 
+with genometools: 
+
+    gt gff3 -sortlines yes -retainids yes -tidy yes -fixregionboundaries yes -addids xx_genes_cleaned.gff > xx_genes_cleaned_sorted.gff
 
 Finally, run flo as:
 
